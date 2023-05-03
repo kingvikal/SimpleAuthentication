@@ -38,7 +38,7 @@ export const register = async (req, res) => {
     }
   } catch (err) {
     console.log("error", err);
-   return res.status(500).json(err);
+    return res.status(500).json(err);
   }
 };
 
@@ -100,10 +100,10 @@ export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, password } = req.body;
-
+    const hashedPassword = bcrypt.hashSync(password, 10);
     const user = await userModel.findByIdAndUpdate(id, {
       email: email,
-      password: bcrypt.hashSync(password, 10),
+      password: hashedPassword,
     });
     return res.status(200).json({ message: "Update Successful" });
   } catch (err) {
