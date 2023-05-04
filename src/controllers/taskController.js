@@ -9,7 +9,15 @@ export const createTask = async (req, res) => {
       name,
     });
     const task = await newTask.save();
-    res.status(200).json({ message: "Task created Successfully", task });
+    const users = await userModel.find().populate("tasks");
+    users.map(async (user) => {
+      if (user.userType === "student") {
+        user.tasks.push(task);
+        await user.save();
+      }
+    });
+
+    res.status(200).json({ message: "Task created Successfully", users });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -30,6 +38,7 @@ export const getTaskById = async (req, res) => {
   try {
     const { id } = req.params;
     const task = await taskModel.findById(id);
+
     res.status(200).json(task);
   } catch (err) {
     console.log(err);
