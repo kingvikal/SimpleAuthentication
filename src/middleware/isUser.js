@@ -15,12 +15,12 @@ export const isUser = async (req, res, next) => {
     }
     const decode = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await userModel.find({ _id: decode.id });
+    const user = await userModel.findById(decode.id);
 
     if (!user) {
       return res.status(404).json("Invalid Request");
     }
-
+    req.user = user;
     next();
   } catch (err) {
     console.log(err);

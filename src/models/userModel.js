@@ -31,8 +31,15 @@ const userModel = new mongoose.Schema(
       type: String,
       enum: ["student", "teacher"],
     },
-   
+
+    tasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TaskModel",
+      },
+    ],
   },
+
   { timestamps: true }
 );
 

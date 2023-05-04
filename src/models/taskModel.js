@@ -7,10 +7,13 @@ const taskModel = mongoose.Schema(
       required: true,
     },
 
-    taskEnum: {
-      type: String,
-      enum: ["student", "teacher"],
+    completed: {
+      type: Boolean,
+      default: false,
     },
+
+    
+
   },
   { timestamps: true }
 );
