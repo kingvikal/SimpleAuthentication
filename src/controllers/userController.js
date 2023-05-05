@@ -1,43 +1,32 @@
 import bcrypt from "bcrypt";
-import { validationResult } from "express-validator";
 import dotenv from "dotenv";
 import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import { sendMail } from "../services/mail.service.js";
+import { authSchema } from "../middleware/joiValidation.js";
 
 dotenv.config();
 
 export const register = async (req, res) => {
-  const { firstName, lastName, email, Age, City, userType, password } =
-    req.body;
-
   try {
-    const error = validationResult(req);
-
-    if (!error.isEmpty()) {
+    const result = await authSchema.validateAsync(req.body);
+    if (!result) {
       res.status(404).send(error);
     } else {
-      const hashedPassword = bcrypt.hashSync(password, 10);
-      const user = await userModel.findOne({ email });
+      const user = await userModel.findOne({ email: result.email });
 
       if (user) {
         return res.status(400).json("Email already exists");
       }
 
       const makeUser = new userModel({
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        Age: Age,
-        City: City,
-        userType: userType,
-        password: hashedPassword,
+        ...result,
       });
       const success = await makeUser.save();
       return res.status(200).json({ success });
     }
   } catch (err) {
-    console.log("error", err);
+    if (err.isJoi === true) return res.status(422).json(err);
     return res.status(500).json(err);
   }
 };
@@ -105,7 +94,7 @@ export const updateUser = async (req, res) => {
       email: email,
       password: hashedPassword,
     });
-    return res.status(200).json({ message: "Update Successful" });
+    return res.status(200).json({ message: "Update Successful", user });
   } catch (err) {
     console.log(err);
     return res.status(500).json(err);
