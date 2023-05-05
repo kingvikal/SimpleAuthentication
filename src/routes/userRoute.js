@@ -9,18 +9,17 @@ import {
   resetPassword,
   updateUser,
 } from "../controllers/userController.js";
-import { validRegister } from "../middleware/userValidation.js";
 import { isUser } from "../middleware/isUser.js";
 
 const router = Router();
 
-router.post("/register", validRegister, register);
+router.post("/register", register);
 router.post("/login", login);
 router.get("/getAll", isUser, getAll);
 router.get("/getById/:id", isUser, getById);
 router.put("/updateUser/:id", isUser, updateUser);
 router.delete("/deleteUser/:id", isUser, deleteUser);
-router.post("/forgetPassword", forgetPassword);
-router.put("/resetPassword/:token", resetPassword);
+router.post("/forgetPassword", isUser, forgetPassword);
+router.put("/resetPassword/:token", isUser, resetPassword);
 
 export default router;
