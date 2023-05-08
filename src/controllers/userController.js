@@ -19,14 +19,14 @@ export const register = async (req, res) => {
         return res.status(400).json("Email already exists");
       }
 
-      const makeUser = new userModel({
-        ...result,
-      });
+      const makeUser = new userModel(result);
       const success = await makeUser.save();
       return res.status(200).json({ success });
     }
   } catch (err) {
-    if (err.isJoi === true) return res.status(422).json(err);
+    if (err.isJoi === true) {
+      return res.status(422).json(err);
+    }
     return res.status(500).json(err);
   }
 };
@@ -130,7 +130,6 @@ export const forgetPassword = async (req, res) => {
 
       await sendMail(email, token, req.headers.host).then((done) => {
         if (done) {
-          console.log("host", req.headers.host);
           return res.send("Reset link has been send, Check Email");
         }
       });
