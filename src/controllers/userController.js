@@ -4,6 +4,7 @@ import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import { sendMail } from "../services/mail.service.js";
 import { authSchema } from "../middleware/joiValidation.js";
+// import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -39,17 +40,31 @@ export const login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json("No user with entered email exists");
-    } else {
+    }
+    if (email && password) {
       const payload = { id: user._id, email: user.email };
       const option = { expiresIn: "1d" };
-      const token = jwt.sign(payload, process.env.JWT_SECRET, option);
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, option);
+      const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+        expiresIn: 86400,
+      });
+
       const compare = bcrypt.compareSync(password, user.password);
       if (!compare) {
         return res.status(404).json({ message: "Password doesn't match" });
       } else {
         return res
           .status(200)
-          .json({ message: "logged in successfully", token: token });
+          .cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            sameSite: "None",
+          })
+          .header("Authorization", accessToken)
+          .json({
+            message: "Login Successful",
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          });
       }
     }
   } catch (err) {
